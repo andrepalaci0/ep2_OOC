@@ -27,33 +27,27 @@ public class GeradorDeRelatorios {
 	public static final int FORMATO_NEGRITO = 0b0001;
 	public static final int FORMATO_ITALICO = 0b0010;
 
-	private Produto[] produtos;
+	private List<Produto> produtos; // otimizacao usando collections, substitui o private Produto[] produtos
 	private String algoritmo;
 	private String criterio;
 	private String filtro;
 	private String argFiltro;
 	private int format_flags;
 
-	public GeradorDeRelatorios(Produto[] produtos, String algoritmo, String criterio, String filtro, String argFiltro,
-			int format_flags) {
+    public GeradorDeRelatorios(List<Produto> produtos, String algoritmo, String criterio, String filtro, String argFiltro, int format_flags) {
 
-		this.produtos = new Produto[produtos.length];
+		this.produtos = new ArrayList<>(produtos); // faz uma copia dos produtos fornecidos, substitui o for que tinha para o vetor
+        this.algoritmo = algoritmo;
+        this.criterio = criterio;
+        this.format_flags = format_flags;
+        this.filtro = filtro;
+        this.argFiltro = argFiltro;
 
-		for (int i = 0; i < produtos.length; i++) {
-
-			this.produtos[i] = produtos[i];
-		}
-
-		this.algoritmo = algoritmo;
-		this.criterio = criterio;
-		this.format_flags = format_flags;
-		this.filtro = filtro;
-		this.argFiltro = argFiltro;
-	}
+    }
 
 	private int particiona(int ini, int fim) {
 
-		Produto x = produtos[ini];
+		Produto x = produtos.get(ini); // subtitui Produto x = produtos[ini] pq nao da para acessar o indice direto na List
 		int i = (ini - 1);
 		int j = (fim + 1);
 
@@ -64,23 +58,23 @@ public class GeradorDeRelatorios {
 				do {
 					j--;
 
-				} while (produtos[j].getDescricao().compareToIgnoreCase(x.getDescricao()) > 0);
+				} while (produtos.get(j).getDescricao().compareToIgnoreCase(x.getDescricao()) > 0);
 
 				do {
 					i++;
 
-				} while (produtos[i].getDescricao().compareToIgnoreCase(x.getDescricao()) < 0);
+				} while (produtos.get(i).getDescricao().compareToIgnoreCase(x.getDescricao()) < 0);
 			} else if (criterio.equals(CRIT_PRECO_CRESC)) {
 
 				do {
 					j--;
 
-				} while (produtos[j].getPreco() > x.getPreco());
+				} while (produtos.grt(j).getPreco() > x.getPreco());
 
 				do {
 					i++;
 
-				} while (produtos[i].getPreco() < x.getPreco());
+				} while (produtos.get(i).getPreco() < x.getPreco());
 			}
 
 			else if (criterio.equals(CRIT_ESTOQUE_CRESC)) {
@@ -88,12 +82,12 @@ public class GeradorDeRelatorios {
 				do {
 					j--;
 
-				} while (produtos[j].getQtdEstoque() > x.getQtdEstoque());
+				} while (produtos.get(j).getQtdEstoque() > x.getQtdEstoque());
 
 				do {
 					i++;
 
-				} while (produtos[i].getQtdEstoque() < x.getQtdEstoque());
+				} while (produtos.get(i).getQtdEstoque() < x.getQtdEstoque());
 
 			} else {
 
@@ -101,12 +95,16 @@ public class GeradorDeRelatorios {
 			}
 
 			if (i < j) {
-				Produto temp = produtos[i];
-				produtos[i] = produtos[j];
-				produtos[j] = temp;
+
+				Produto temp = produtos.get(i);
+				produtos.set(i, produtos.get(j)); // substitui produtos[i] = produtos[j];
+				produtos.set(j, temp); // substitui produtos[j] = temp;
+
 			} else
 				return j;
+
 		}
+
 	}
 
 	private void ordena(int ini, int fim) {
