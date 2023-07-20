@@ -92,7 +92,7 @@ public class GeradorDeRelatorios {
 
 			if (i < j) {
 
-				Produto temp = produtos.get(i);
+				Produto temp = produtos.get(i); // substitui Produto temp = produtos[i];
 				produtos.set(i, produtos.get(j)); // substitui produtos[i] = produtos[j];
 				produtos.set(j, temp); // substitui produtos[j] = temp;
 
@@ -109,32 +109,32 @@ public class GeradorDeRelatorios {
 
 			for (int i = ini; i <= fim; i++) {
 
-				Produto x = produtos[i];
+				Produto x = produtos.get(i);
 				int j = (i - 1);
 
 				while (j >= ini) {
 
 					if (criterio.equals(CRIT_DESC_CRESC)) {
 
-						if (x.getDescricao().compareToIgnoreCase(produtos[j].getDescricao()) < 0) {
+						if (x.getDescricao().compareToIgnoreCase(produtos.get(j).getDescricao()) < 0) {
 
-							produtos[j + 1] = produtos[j];
+							produtos.set(j + 1, produtos.get(j)); // substitui produtos[j + 1] = produtos[j];
 							j--;
 						} else
 							break;
 					} else if (criterio.equals(CRIT_PRECO_CRESC)) {
 
-						if (x.getPreco() < produtos[j].getPreco()) {
+						if (x.getPreco() < produtos.get(j).getPreco()) {
 
-							produtos[j + 1] = produtos[j];
+							produtos.set(j + 1, produtos.get(j)); // substitui produtos[j + 1] = produtos[j];
 							j--;
 						} else
 							break;
 					} else if (criterio.equals(CRIT_ESTOQUE_CRESC)) {
 
-						if (x.getQtdEstoque() < produtos[j].getQtdEstoque()) {
+						if (x.getQtdEstoque() < produtos.get(j).getQtdEstoque()) {
 
-							produtos[j + 1] = produtos[j];
+							produtos.set(j + 1, produtos.get(j)); // substitui produtos[j + 1] = produtos[j];
 							j--;
 						} else
 							break;
@@ -142,7 +142,7 @@ public class GeradorDeRelatorios {
 						throw new RuntimeException("Criterio invalido!");
 				}
 
-				produtos[j + 1] = x;
+				produtos.set(j + 1, x); // substitui produtos[j + 1] = x;
 			}
 		} else if (algoritmo.equals(ALG_QUICKSORT)) {
 
@@ -158,9 +158,9 @@ public class GeradorDeRelatorios {
 		}
 	}
 
-	public void debug() {
+	public void debug() { // produtos.size() substitui produtos.length
 
-		System.out.println("Gerando relatório para array contendo " + produtos.length + " produto(s)");
+		System.out.println("Gerando relatório para lista contendo " + produtos.size() + " produto(s)");
 		System.out.println("parametro filtro = '" + argFiltro + "'");
 	}
 
