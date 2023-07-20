@@ -267,7 +267,7 @@ public class GeradorDeRelatorios {
 		SortingAlgoStrategy strategy = getSortStrategy();
 		strategy.ordena(produtos, 0, produtos.size()-1); // novo, utilizando strategy
 		// tem q mudar oq essa bomba de ordenacao recebe.
-		ordena(0, produtos.size() - 1); // antigo
+		//ordena(0, produtos.size() - 1); // antigo
 
 		PrintWriter out = new PrintWriter(arquivoSaida);
 
