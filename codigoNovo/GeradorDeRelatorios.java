@@ -13,6 +13,10 @@ public class GeradorDeRelatorios {
 	public static final String CRIT_PRECO_CRESC = "preco_c";
 	public static final String CRIT_ESTOQUE_CRESC = "estoque_c";
 
+	public static final String CRIT_DESC_DECRESC = "descricao_dc";
+	public static final String CRIT_PRECO_DECRESC = "preco_dc";
+	public static final String CRIT_ESTOQUE_DECRESC = "estoque_dc";
+
 	public static final String FILTRO_TODOS = "todos";
 	public static final String FILTRO_ESTOQUE_MENOR_OU_IQUAL_A = "estoque_menor_igual";
 	public static final String FILTRO_CATEGORIA_IGUAL_A = "categoria_igual";
@@ -169,18 +173,24 @@ public class GeradorDeRelatorios {
 	/*
 	 * Coisas a se consertar no código:
 	 * 
-	 * 1. STRATEGY: algoritmo de ordenação: Quicksort e Insertion Sort. (Parcialmente Feito. Olhar arquivos que comecem com SortingAlgo)
+	 * 1. STRATEGY: algoritmo de ordenação: Quicksort e Insertion Sort.
+	 * (Parcialmente Feito. Olhar arquivos que comecem com SortingAlgo)
 	 * 
-	 * 2. STRATEGY: critério de ordenação: ordem crescente pelo atributo descrição de um
-	 * produto; ordem crescente pelo atributo preço de um produto; e ordem crescente pelo atributo
+	 * 2. STRATEGY: critério de ordenação: ordem crescente pelo atributo descrição
+	 * de um
+	 * produto; ordem crescente pelo atributo preço de um produto; e ordem crescente
+	 * pelo atributo
 	 * quantidade em estoque de um produto.
 	 * 
-	 * 3. STRATEGY: critério de filtragem: todos (ou seja, todos os produtos entram na
-	 * listagem gerada); produtos cujo estoque seja menor ou igual a uma certa quantidade; e produtos de uma
+	 * 3. STRATEGY: critério de filtragem: todos (ou seja, todos os produtos entram
+	 * na
+	 * listagem gerada); produtos cujo estoque seja menor ou igual a uma certa
+	 * quantidade; e produtos de uma
 	 * determinada categoria.
 	 * 
 	 * 4. opções de formatação: padrão (nenhuma opção aplicada); itálico; e negrito.
-	 * As formatações são implementadas usando tags HTML que aplicam o efeito desejado a um texto
+	 * As formatações são implementadas usando tags HTML que aplicam o efeito
+	 * desejado a um texto
 	 */
 
 	/*
@@ -199,6 +209,45 @@ public class GeradorDeRelatorios {
 	 * •carregar produtos de um arquivo CSV (exemplo acompanha enunciado) e
 	 * salvá-los em umacoleção de produtos;
 	 */
+	private SortingAlgoStrategy getSortingAlgorithm(boolean crescente) {
+		if (crescente) {
+			if (algoritmo.equals(ALG_INSERTIONSORT)) {
+				return new SortingAlgoCrescInsertionSort();
+			} else if (algoritmo.equals(ALG_QUICKSORT)) {
+				return new SortingAlgoCrescQuickSort();
+			} else {
+				throw new IllegalArgumentException("Algoritmo invalido!");
+			}
+		}else{
+			if (algoritmo.equals(ALG_INSERTIONSORT)) {
+				return new SortingAlgoDecrescInsertionSort(); 
+			} else if (algoritmo.equals(ALG_QUICKSORT)) {
+				return new SortingAlgoDecrescQuickSort();
+			} else {
+				throw new IllegalArgumentException("Algoritmo invalido!");
+			}
+		}
+	}
+
+	private SortingAlgoStrategy getSortStrategy() {
+		SortingAlgoStrategy strategy;
+		if (criterio.equals(CRIT_PRECO_CRESC)) {
+			strategy = new PrecoSortingStrategy(getSortingAlgorithm(true));
+		} else if (criterio.equals(CRIT_DESC_CRESC)) {
+			strategy = new DescSortingStrategy(getSortingAlgorithm(true));
+		} else if (criterio.equals(CRIT_ESTOQUE_CRESC)) {
+			strategy = new QtdSortingStrategy(getSortingAlgorithm(true));
+		} else if (criterio.equals(CRIT_DESC_DECRESC)) {
+			strategy = new DescSortingStrategy(getSortingAlgorithm(false));
+		} else if (criterio.equals(CRIT_ESTOQUE_DECRESC)) {
+			strategy = new QtdSortingStrategy(getSortingAlgorithm(false));
+		} else if (criterio.equals(CRIT_PRECO_DECRESC)) {
+			strategy = new PrecoSortingStrategy(getSortingAlgorithm(false));
+		} else {
+			throw new IllegalArgumentException("Criterio invalido!");
+		}
+		return strategy;
+	}
 
 	public void geraRelatorio(String arquivoSaida) throws IOException {
 
@@ -212,18 +261,14 @@ public class GeradorDeRelatorios {
 		 * Foda que ainda nao sei exatamente o certo a se fazer
 		 */
 
+		// A FUNCAO ORDENA VAI SER UM TIPO STRATEGY, QUE VAI DEFINIDO DE ACORDO COM OS
+		// PARAMETROS DO OBJETO
 
-		//A FUNCAO ORDENA VAI SER UM TIPO STRATEGY, QUE VAI DEFINIDO DE ACORDO COM OS PARAMETROS DO OBJETO
-		SortingAlgoStrategy ordenacao;
-		if(this.algoritmo.equals(ALG_INSERTIONSORT))
-		{
-			ordenacao = new SortingAlgoInsertionSort();
-		}else{
-			ordenacao = new SortingAlgoQuickSort();
-		}
-		//ficaria:
-		ordenacao.ordena(0, produtos.length-1); //novo, utilizando strategy
-		ordena(0, produtos.length - 1); //antigo
+		// ficaria:
+		SortingAlgoStrategy strategy = getSortStrategy();
+		strategy.ordena(0, produtos.length - 1); // novo, utilizando strategy
+		// tem q mudar oq essa bomba de ordenacao recebe.
+		ordena(0, produtos.length - 1); // antigo
 
 		PrintWriter out = new PrintWriter(arquivoSaida);
 
@@ -290,7 +335,6 @@ public class GeradorDeRelatorios {
 		out.println(count + " produtos listados, de um total de " + produtos.length + ".");
 		out.println("</body>");
 		out.println("</html>");
-
 		out.close();
 	}
 
