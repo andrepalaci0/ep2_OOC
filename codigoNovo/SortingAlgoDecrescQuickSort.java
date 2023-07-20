@@ -1,71 +1,77 @@
+import java.util.*;
 public class SortingAlgoDecrescQuickSort implements SortingAlgoStrategy
 {
-    public void ordena(int ini, int fim)
-    {
-        //TEM QUE ALTERAR PRA SER DECRESCENTE
+    
+    public void ordena(List <Produto> produtos, int ini, int fim) {
+
         if (ini < fim) {
 
-            int q = particiona(ini, fim);
+            int q = particiona(produtos, ini, fim);
 
-            ordena(ini, q);
-            ordena(q + 1, fim);
+            ordena(produtos, ini, q);
+            ordena(produtos, q + 1, fim);
         }
+
     }
-    private int particiona(int ini, int fim) {
-        //tem q alterar oq ele recebe, pra ele ordenar por um tipo generico pré definido
-        Produto x = produtos[ini];
-        int i = (ini - 1);
-        int j = (fim + 1);
 
-        while (true) {
+    private int particiona(List<Produto> produtos, int ini, int fim) {
+        Produto x = produtos.get(ini); // subtitui Produto x = produtos[ini] pq nao da para acessar o indice direto na List
+		int i = (ini - 1);
+		int j = (fim + 1);
 
-            if (criterio.equals(CRIT_DESC_CRESC)) {
+		while (true) {
 
-                do {
-                    j--;
+			if (criterio.equals(CRIT_DESC_CRESC)) {
 
-                } while (produtos[j].getDescricao().compareToIgnoreCase(x.getDescricao()) > 0);
+				do {
+					j--;
 
-                do {
-                    i++;
+				} while (produtos.get(j).getDescricao().compareToIgnoreCase(x.getDescricao()) > 0);
 
-                } while (produtos[i].getDescricao().compareToIgnoreCase(x.getDescricao()) < 0);
-            } else if (criterio.equals(CRIT_PRECO_CRESC)) {
+				do {
+					i++;
 
-                do {
-                    j--;
+				} while (produtos.get(i).getDescricao().compareToIgnoreCase(x.getDescricao()) < 0);
+			} else if (criterio.equals(CRIT_PRECO_CRESC)) {
 
-                } while (produtos[j].getPreco() > x.getPreco());
+				do {
+					j--;
 
-                do {
-                    i++;
+				} while (produtos.get(j).getPreco() > x.getPreco());
 
-                } while (produtos[i].getPreco() < x.getPreco());
-            }
+				do {
+					i++;
 
-            else if (criterio.equals(CRIT_ESTOQUE_CRESC)) {
+				} while (produtos.get(i).getPreco() < x.getPreco());
+			}
 
-                do {
-                    j--;
+			else if (criterio.equals(CRIT_ESTOQUE_CRESC)) {
 
-                } while (produtos[j].getQtdEstoque() > x.getQtdEstoque());
+				do {
+					j--;
 
-                do {
-                    i++;
+				} while (produtos.get(j).getQtdEstoque() > x.getQtdEstoque());
 
-                } while (produtos[i].getQtdEstoque() < x.getQtdEstoque());
+				do {
+					i++;
 
-            } else {
+				} while (produtos.get(i).getQtdEstoque() < x.getQtdEstoque());
 
-                throw new RuntimeException("Criterio invalido!");
-            }
+			} else {
 
-            if (i < j) {
-                Produto temp = produtos[i];
-                produtos[i] = produtos[j];
-                produtos[j] = temp;
-            } else
-                return j;
-        }
+				throw new RuntimeException("Criterio invalido!");
+			}
+
+			if (i < j) {
+
+				Produto temp = produtos.get(i); // substitui Produto temp = produtos[i];
+				produtos.set(i, produtos.get(j)); // substitui produtos[i] = produtos[j];
+				produtos.set(j, temp); // substitui produtos[j] = temp;
+
+			} else
+				return j;
+
+		}
+        
     }
 }
