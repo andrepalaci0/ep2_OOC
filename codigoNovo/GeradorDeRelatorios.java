@@ -284,7 +284,7 @@ public class GeradorDeRelatorios {
 			Produto p = produtos.get(i);
 			boolean selecionado = false;
 
-			if (filtro.equals(FILTRO_TODOS)) {
+			if (filtro.equals(FILTRO_TODOS)) { //tem q fazer a filtragem ainda
 
 				selecionado = true;
 			} else if (filtro.equals(FILTRO_ESTOQUE_MENOR_OU_IQUAL_A)) {
@@ -299,7 +299,7 @@ public class GeradorDeRelatorios {
 				throw new RuntimeException("Filtro invalido!");
 			}
 
-			if (selecionado) {
+			if (selecionado) { //tem que implementar o decorator aqui
 
 				out.print("<li>");
 

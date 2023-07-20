@@ -8,12 +8,26 @@ public class ProdutoItalico extends ProdutoDecorator{
     public String formataParaImpressao()
     {
         String textToItalic = original;
-        String italic = "<span style=\"font-style:italic\"> ";
-		
+        textToItalic = addItalic(textToItalic);
         //textToItalic = italic + textToItalic;
         //isso aqui nao ta exatamente certo, tem q fazer uma busca pelo
         //"style" e inserir dentro dele. vou fazer depois :)
-
         return textToItalic;
     }
+
+    private String addItalic(String string) {
+        String aux;
+        if (!hasStyle(string)) {
+            aux = "<span style=\" font-style:italic; \">";
+            return (aux + string);
+        } else {
+            String style = "style=\"";
+            String insert = "font-style:italic; ";
+            int index = string.indexOf(style);
+            String out = string.substring(0, index + style.length()) + insert
+                    + string.substring(index + style.length());
+            return out;
+        }
+    }
+
 }

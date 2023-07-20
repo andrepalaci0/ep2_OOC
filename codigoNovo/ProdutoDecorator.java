@@ -2,7 +2,6 @@ import java.text.NumberFormat;
 
 abstract class ProdutoDecorator implements Produto {
     private static final String SEPARADOR = ", ";
-
     private int id;
     private String descricao;
     private String categoria;
@@ -83,4 +82,31 @@ abstract class ProdutoDecorator implements Produto {
                 + getQtdEstoque() + " unidade(s) em estoque";
     }
 
+    protected boolean hasStyle(String string) {
+        String style = "style=\"";
+        int index = string.indexOf(style);
+        if (index == -1)
+            return false;
+        else
+            return true;
+    }
+
+    protected boolean hasSpan(String string) {
+        String span = "</span>";
+        int index = string.indexOf(span);
+        if (index == -1)
+            return false;
+        else
+            return true;
+    }
+
+    protected String addSpan(String string){
+        String aux;
+        if(hasSpan(string)) return string;
+        else{
+            aux = "</span>";
+            String out = string + aux;
+            return out;
+        }
+    }
 }
