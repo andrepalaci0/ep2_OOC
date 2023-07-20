@@ -1,4 +1,4 @@
-public class SortingAlgoQuickSort implements SortingAlgoStrategy {
+public class SortingAlgoCrescQuickSort implements SortingAlgoStrategy {
     // obviamente esses algoritmos tem q ser adaptados p receber a collection que,
     // teoricamente
     // vai permitir um acesso a essas variaveis
@@ -17,6 +17,7 @@ public class SortingAlgoQuickSort implements SortingAlgoStrategy {
     }
 
     private int particiona(int ini, int fim) {
+        //tem q alterar oq ele recebe, pra ele ordenar por um tipo generico pré definido
         Produto x = produtos[ini];
         int i = (ini - 1);
         int j = (fim + 1);
