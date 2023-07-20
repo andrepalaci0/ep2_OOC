@@ -1,5 +1,5 @@
 import java.util.*;
-public class SortingAlgoCrescInsertionSort implements SortingAlgoStrategy {
+public class InsertionSortCresc implements SortingStrategy {
     /*
      * public int particiona(int ini, int fim) {
      * return -1; // esse metodo nao eh util pro insertionSort entao ele so retorna

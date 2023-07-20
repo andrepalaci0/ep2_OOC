@@ -1,5 +1,5 @@
 import java.util.*;
-interface SortingAlgoStrategy
+interface SortingStrategy
 {
     public static final String CRIT_DESC_CRESC = "descricao_c";
 	public static final String CRIT_PRECO_CRESC = "preco_c";

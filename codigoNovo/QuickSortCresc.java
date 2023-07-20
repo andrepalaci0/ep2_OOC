@@ -1,5 +1,5 @@
 import java.util.*;
-public class SortingAlgoCrescQuickSort implements SortingAlgoStrategy {
+public class QuickSortCresc implements SortingStrategy {
     // obviamente esses algoritmos tem q ser adaptados p receber a collection que,
     // teoricamente
     // vai permitir um acesso a essas variaveis

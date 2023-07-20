@@ -3,6 +3,9 @@ import java.io.PrintWriter;
 import java.io.IOException;
 
 import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 
 public class GeradorDeRelatorios {
 
@@ -208,40 +211,40 @@ public class GeradorDeRelatorios {
 	 * •carregar produtos de um arquivo CSV (exemplo acompanha enunciado) e
 	 * salvá-los em umacoleção de produtos;
 	 */
-	private SortingAlgoStrategy getSortingAlgorithm(boolean crescente) {
+	private SortingStrategy getSortingAlgorithm(boolean crescente) {
 		if (crescente) {
 			if (algoritmo.equals(ALG_INSERTIONSORT)) {
-				return new SortingAlgoCrescInsertionSort();
+				return new InsertionSortCresc();
 			} else if (algoritmo.equals(ALG_QUICKSORT)) {
-				return new SortingAlgoCrescQuickSort();
+				return new QuickSortCresc();
 			} else {
 				throw new IllegalArgumentException("Algoritmo invalido!");
 			}
 		}else{
 			if (algoritmo.equals(ALG_INSERTIONSORT)) {
-				return new SortingAlgoDecrescInsertionSort(); 
+				return new InsertionSortDecresc(); 
 			} else if (algoritmo.equals(ALG_QUICKSORT)) {
-				return new SortingAlgoDecrescQuickSort();
+				return new QuickSortDecresc();
 			} else {
 				throw new IllegalArgumentException("Algoritmo invalido!");
 			}
 		}
 	}
 
-	private SortingAlgoStrategy getSortStrategy() {
-		SortingAlgoStrategy strategy;
+	private SortingStrategy getSortStrategy() {
+		SortingStrategy strategy;
 		if (criterio.equals(CRIT_PRECO_CRESC)) {
-			strategy = new PrecoSortingStrategy(getSortingAlgorithm(true));
+			strategy = new SortPreco(getSortingAlgorithm(true));
 		} else if (criterio.equals(CRIT_DESC_CRESC)) {
-			strategy = new DescSortingStrategy(getSortingAlgorithm(true));
+			strategy = new SortDesc(getSortingAlgorithm(true));
 		} else if (criterio.equals(CRIT_ESTOQUE_CRESC)) {
-			strategy = new QtdSortingStrategy(getSortingAlgorithm(true));
+			strategy = new SortQtd(getSortingAlgorithm(true));
 		} else if (criterio.equals(CRIT_DESC_DECRESC)) {
-			strategy = new DescSortingStrategy(getSortingAlgorithm(false));
+			strategy = new SortDesc(getSortingAlgorithm(false));
 		} else if (criterio.equals(CRIT_ESTOQUE_DECRESC)) {
-			strategy = new QtdSortingStrategy(getSortingAlgorithm(false));
+			strategy = new SortQtd(getSortingAlgorithm(false));
 		} else if (criterio.equals(CRIT_PRECO_DECRESC)) {
-			strategy = new PrecoSortingStrategy(getSortingAlgorithm(false));
+			strategy = new SortPreco(getSortingAlgorithm(false));
 		} else {
 			throw new IllegalArgumentException("Criterio invalido!");
 		}
@@ -251,20 +254,11 @@ public class GeradorDeRelatorios {
 	public void geraRelatorio(String arquivoSaida) throws IOException {
 
 		debug();
-		/*
-		 * essa funcao gera relatorio muito provavelmente quebra o
-		 * Single Responsability Principle pq ela basicamente faz tudo que o código
-		 * manda
-		 * Acho que, dada certa explicação no relatório, da pra mudar bastante coisa
-		 * aqui
-		 * Foda que ainda nao sei exatamente o certo a se fazer
-		 */
-
 		// A FUNCAO ORDENA VAI SER UM TIPO STRATEGY, QUE VAI DEFINIDO DE ACORDO COM OS
 		// PARAMETROS DO OBJETO
 
 		// ficaria:
-		SortingAlgoStrategy strategy = getSortStrategy();
+		SortingStrategy strategy = getSortStrategy();
 		strategy.ordena(produtos, 0, produtos.size()-1); // novo, utilizando strategy
 		// tem q mudar oq essa bomba de ordenacao recebe.
 		//ordena(0, produtos.size() - 1); // antigo
@@ -337,6 +331,35 @@ public class GeradorDeRelatorios {
 		out.close();
 	}
 
+	public List<Produto> recebeCarregaProdutos(File csvFile)
+	{
+		List<Produto> list = new ArrayList<Produto>();
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+
+            String linha = br.readLine();
+            linha = br.readLine();
+            while (linha != null) {
+
+                String[] vetor = linha.split(", ");
+                Integer id = Integer.parseInt(vetor[0]);
+                String descricao = vetor[1];
+                String categoria = vetor[2];
+                Integer qntEstoque = Integer.parseInt(vetor[3]);
+                Double preco = Double.parseDouble(vetor[4]);
+
+                Produto prod = new ProdutoPadrao(id, descricao, categoria, qntEstoque, preco);
+                list.add(prod);
+
+                linha = br.readLine();
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        return list;
+	}
+
 	public static List<Produto> carregaProdutos() {
 
 		List<Produto> produtos = new ArrayList<>();
@@ -384,12 +407,13 @@ public class GeradorDeRelatorios {
 
 			System.out.println("Uso:");
 			System.out.println("\tjava " + GeradorDeRelatorios.class.getName()
-					+ " <algoritmo> <critério de ordenação> <critério de filtragem> <parâmetro de filtragem> <opções de formatação>");
+					+ " <algoritmo> <critério de ordenação> <critério de filtragem> <parâmetro de filtragem> <arquivo.csv> <opções de formatação>");
 			System.out.println("Onde:");
 			System.out.println("\talgoritmo: 'quick' ou 'insertion'");
 			System.out.println("\tcriterio de ordenação: 'preco_c' ou 'descricao_c' ou 'estoque_c'");
 			System.out.println("\tcriterio de filtragem: 'todos' ou 'estoque_menor_igual' ou 'categoria_igual'");
 			System.out.println("\tparâmetro de filtragem: argumentos adicionais necessários para a filtragem");
+			System.out.println("\tarquivo.csv: arquivo planilha que contém os produtos que serão usados pelo programa");
 			System.out.println("\topções de formatação: 'negrito' e/ou 'italico'");
 			System.out.println();
 			System.exit(1);
@@ -399,10 +423,13 @@ public class GeradorDeRelatorios {
 		String opcao_criterio_ord = args[1];
 		String opcao_criterio_filtro = args[2];
 		String opcao_parametro_filtro = args[3];
-
+		String filePath = args[4];
+		File csvFile = new File(filePath);
+		
+		
 		String[] opcoes_formatacao = new String[2];
-		opcoes_formatacao[0] = args.length > 4 ? args[4] : null;
-		opcoes_formatacao[1] = args.length > 5 ? args[5] : null;
+		opcoes_formatacao[0] = args.length > 5 ? args[5] : null;
+		opcoes_formatacao[1] = args.length > 6 ? args[6] : null;
 		int formato = FORMATO_PADRAO;
 
 		for (int i = 0; i < opcoes_formatacao.length; i++) {
@@ -412,7 +439,8 @@ public class GeradorDeRelatorios {
 					? op.equals("negrito") ? FORMATO_NEGRITO : (op.equals("italico") ? FORMATO_ITALICO : 0)
 					: 0);
 		}
-
+								//já pode ser usado:
+								//new GeradorDeRelatorios(recebeCarregaProdutos(csvFile))
 		GeradorDeRelatorios gdr = new GeradorDeRelatorios(carregaProdutos(),
 				opcao_algoritmo,
 				opcao_criterio_ord,

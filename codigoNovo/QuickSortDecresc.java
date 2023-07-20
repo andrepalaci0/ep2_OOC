@@ -1,5 +1,5 @@
 import java.util.*;
-public class SortingAlgoDecrescQuickSort implements SortingAlgoStrategy
+public class QuickSortDecresc implements SortingStrategy
 {
     
     public void ordena(List <Produto> produtos, int ini, int fim) {

@@ -1,6 +1,6 @@
-public class DescSortingStrategy implements SortingAlgoStrategy{
-    private SortingAlgoStrategy sortAlgo;
-    public DescSortingStrategy(SortingAlgoStrategy algo)
+public class SortDesc implements SortingStrategy{
+    private SortingStrategy sortAlgo;
+    public SortDesc(SortingStrategy algo)
     {
         this.sortAlgo = algo;
     }

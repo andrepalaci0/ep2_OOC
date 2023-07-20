@@ -1,6 +1,6 @@
-public class PrecoSortingStrategy implements SortingAlgoStrategy{
-    private SortingAlgoStrategy sortAlgo;
-    public PrecoSortingStrategy(SortingAlgoStrategy algo)
+public class SortPreco implements SortingStrategy{
+    private SortingStrategy sortAlgo;
+    public SortPreco(SortingStrategy algo)
     {
         this.sortAlgo = algo;
     }

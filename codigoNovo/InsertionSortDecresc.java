@@ -1,5 +1,5 @@
 import java.util.*;
-public class SortingAlgoDecrescInsertionSort implements SortingAlgoStrategy
+public class InsertionSortDecresc implements SortingStrategy
 {
     public void ordena(List <Produto> produtos, int ini, int fim) {
         // tem q alterar oq ele recebe, pra ele ordenar por um tipo generico pré

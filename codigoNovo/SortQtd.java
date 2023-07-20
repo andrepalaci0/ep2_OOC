@@ -1,6 +1,6 @@
-public class QtdSortingStrategy implements SortingAlgoStrategy{
-    private SortingAlgoStrategy sortAlgo;
-    public QtdSortingStrategy(SortingAlgoStrategy algo)
+public class SortQtd implements SortingStrategy{
+    private SortingStrategy sortAlgo;
+    public SortQtd(SortingStrategy algo)
     {
         this.sortAlgo = algo;
     }
