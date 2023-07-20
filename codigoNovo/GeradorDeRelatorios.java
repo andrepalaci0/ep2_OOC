@@ -183,10 +183,9 @@ public class GeradorDeRelatorios {
 	 * quantidade em estoque de um produto.
 	 * 
 	 * 3. STRATEGY: critério de filtragem: todos (ou seja, todos os produtos entram
-	 * na
-	 * listagem gerada); produtos cujo estoque seja menor ou igual a uma certa
-	 * quantidade; e produtos de uma
-	 * determinada categoria.
+	 * na listagem gerada); produtos cujo estoque seja menor ou igual a uma certa
+	 * quantidade; e produtos de uma determinada categoria. 
+	 * 	-> ainda vou criar um strategy pra cada tipo de filto
 	 * 
 	 * 4. opções de formatação: padrão (nenhuma opção aplicada); itálico; e negrito.
 	 * As formatações são implementadas usando tags HTML que aplicam o efeito
