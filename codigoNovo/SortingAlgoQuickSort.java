@@ -1,5 +1,11 @@
 public class SortingAlgoQuickSort implements SortingAlgoStrategy {
-    public int particiona(int ini, int fim) {
+    // obviamente esses algoritmos tem q ser adaptados p receber a collection que,
+    // teoricamente
+    // vai permitir um acesso a essas variaveis
+    // nao sei preciso pensar ainda - itu
+
+    public void ordena(int ini, int fim) {
+
         if (ini < fim) {
 
             int q = particiona(ini, fim);
@@ -7,14 +13,10 @@ public class SortingAlgoQuickSort implements SortingAlgoStrategy {
             ordena(ini, q);
             ordena(q + 1, fim);
         }
-        return 0;
+
     }
-    //obviamente esses algoritmos tem q ser adaptados p receber a collection que, teoricamente
-    //vai permitir um acesso a essas variaveis
-    //nao sei preciso pensar ainda - itu
 
-    public void ordena(int ini, int fim) {
-
+    private int particiona(int ini, int fim) {
         Produto x = produtos[ini];
         int i = (ini - 1);
         int j = (fim + 1);
@@ -70,4 +72,5 @@ public class SortingAlgoQuickSort implements SortingAlgoStrategy {
                 return j;
         }
     }
+
 }
