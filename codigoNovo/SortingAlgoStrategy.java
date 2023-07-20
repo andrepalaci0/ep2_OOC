@@ -1,4 +1,5 @@
+import java.util.*;
 interface SortingAlgoStrategy
 {
-    public void ordena(int ini, int fim);
+    public void ordena(List<Produto> produtos, int ini, int fim);
 }

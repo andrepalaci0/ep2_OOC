@@ -265,9 +265,9 @@ public class GeradorDeRelatorios {
 
 		// ficaria:
 		SortingAlgoStrategy strategy = getSortStrategy();
-		strategy.ordena(0, produtos.length - 1); // novo, utilizando strategy
+		strategy.ordena(produtos, 0, produtos.size()-1); // novo, utilizando strategy
 		// tem q mudar oq essa bomba de ordenacao recebe.
-		ordena(0, produtos.length - 1); // antigo
+		ordena(0, produtos.size() - 1); // antigo
 
 		PrintWriter out = new PrintWriter(arquivoSaida);
 
@@ -279,9 +279,9 @@ public class GeradorDeRelatorios {
 
 		int count = 0;
 
-		for (int i = 0; i < produtos.length; i++) {
+		for (int i = 0; i < produtos.size(); i++) {
 
-			Produto p = produtos[i];
+			Produto p = produtos.get(i);
 			boolean selecionado = false;
 
 			if (filtro.equals(FILTRO_TODOS)) {
@@ -331,7 +331,7 @@ public class GeradorDeRelatorios {
 		}
 
 		out.println("</ul>");
-		out.println(count + " produtos listados, de um total de " + produtos.length + ".");
+		out.println(count + " produtos listados, de um total de " + produtos.size() + ".");
 		out.println("</body>");
 		out.println("</html>");
 		out.close();
