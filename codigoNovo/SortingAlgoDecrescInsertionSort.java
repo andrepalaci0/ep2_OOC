@@ -1,44 +1,39 @@
 public class SortingAlgoDecrescInsertionSort implements SortingAlgoStrategy
 {
-    public void ordena(int ini, int fim)
-    {
-        //TEM QUE ALTERAR PRA SER DECRESCENTE
+    public void ordena(List<Produto> produtos, int ini, int fim) { // confere se isso ta ok - ana
+        // tem que alterar o que ele recebe, para ele ordenar por um tipo genérico pré definido
+    
         for (int i = ini; i <= fim; i++) {
-
-            Produto x = produtos[i];
+            Produto x = produtos.get(i);
             int j = (i - 1);
-
+    
             while (j >= ini) {
-
-                if (criterio.equals(CRIT_DESC_CRESC)) {
-
-                    if (x.getDescricao().compareToIgnoreCase(produtos[j].getDescricao()) < 0) {
-
-                        produtos[j + 1] = produtos[j];
+                if (criterio.equals(CRIT_DESC_DECRESC)) {
+                    if (x.getDescricao().compareToIgnoreCase(produtos.get(j).getDescricao()) > 0) { // Alteração aqui
+                        produtos.set(j + 1, produtos.get(j));
                         j--;
-                    } else
+                    } else {
                         break;
-                } else if (criterio.equals(CRIT_PRECO_CRESC)) {
-
-                    if (x.getPreco() < produtos[j].getPreco()) {
-
-                        produtos[j + 1] = produtos[j];
+                    }
+                } else if (criterio.equals(CRIT_PRECO_DECRESC)) {
+                    if (x.getPreco() > produtos.get(j).getPreco()) { // Alteração aqui
+                        produtos.set(j + 1, produtos.get(j));
                         j--;
-                    } else
+                    } else {
                         break;
-                } else if (criterio.equals(CRIT_ESTOQUE_CRESC)) {
-
-                    if (x.getQtdEstoque() < produtos[j].getQtdEstoque()) {
-
-                        produtos[j + 1] = produtos[j];
+                    }
+                } else if (criterio.equals(CRIT_ESTOQUE_DECRESC)) {
+                    if (x.getQtdEstoque() > produtos.get(j).getQtdEstoque()) { // Alteração aqui
+                        produtos.set(j + 1, produtos.get(j));
                         j--;
-                    } else
+                    } else {
                         break;
-                } else
+                    }
+                } else {
                     throw new RuntimeException("Criterio invalido!");
+                }
             }
-
-            produtos[j + 1] = x;
+            produtos.set(j + 1, x);
         }
     }
 }

@@ -45,7 +45,7 @@ public class GeradorDeRelatorios {
 
     }
 
-	private int particiona(int ini, int fim) {
+	private int particiona(List<Produto> produtos, int ini, int fim) { // nao tenho ctz, mas acho que os parametros tao certos - ana
 
 		Produto x = produtos.get(ini); // subtitui Produto x = produtos[ini] pq nao da para acessar o indice direto na List
 		int i = (ini - 1);
@@ -107,7 +107,7 @@ public class GeradorDeRelatorios {
 
 	}
 
-	private void ordena(int ini, int fim) {
+	private void ordena(List<Produto> produtos, int ini, int fim) { // nao tenho ctz, mas acho que os parametros tao certos - ana
 
 		if (algoritmo.equals(ALG_INSERTIONSORT)) {
 
