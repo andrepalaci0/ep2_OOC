@@ -69,7 +69,7 @@ public class GeradorDeRelatorios {
 				do {
 					j--;
 
-				} while (produtos.grt(j).getPreco() > x.getPreco());
+				} while (produtos.get(j).getPreco() > x.getPreco());
 
 				do {
 					i++;
@@ -164,7 +164,7 @@ public class GeradorDeRelatorios {
 
 	public void debug() {
 
-		System.out.println("Gerando relatório para array contendo " + produtos.length + " produto(s)");
+		System.out.println("Gerando relatório para array contendo " + produtos.size() + " produto(s)");
 		System.out.println("parametro filtro = '" + argFiltro + "'");
 	}
 
