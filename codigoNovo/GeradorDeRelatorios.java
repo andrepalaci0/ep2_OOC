@@ -3,6 +3,9 @@ import java.io.PrintWriter;
 import java.io.IOException;
 
 import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 
 public class GeradorDeRelatorios {
 
@@ -20,6 +23,8 @@ public class GeradorDeRelatorios {
 	public static final String FILTRO_TODOS = "todos";
 	public static final String FILTRO_ESTOQUE_MENOR_OU_IQUAL_A = "estoque_menor_igual";
 	public static final String FILTRO_CATEGORIA_IGUAL_A = "categoria_igual";
+	public static final String FILTRO_PRECO_INTERVALO = "preco_intervalo";
+	public static final String FILTRO_DESCRICAO_SUBSTRING = "descricao_sub";
 
 	// operador bit a bit "ou" pode ser usado para combinar mais de
 	// um estilo de formatacao simultaneamente (veja como no main)
@@ -34,20 +39,23 @@ public class GeradorDeRelatorios {
 	private String argFiltro;
 	private int format_flags;
 
-    public GeradorDeRelatorios(List<Produto> produtos, String algoritmo, String criterio, String filtro, String argFiltro, int format_flags) {
+	public GeradorDeRelatorios(List<Produto> produtos, String algoritmo, String criterio, String filtro,
+			String argFiltro, int format_flags) {
 
-		this.produtos = new ArrayList<>(produtos); // faz uma copia dos produtos fornecidos, substitui o for que tinha para o vetor
-        this.algoritmo = algoritmo;
-        this.criterio = criterio;
-        this.format_flags = format_flags;
-        this.filtro = filtro;
-        this.argFiltro = argFiltro;
+		this.produtos = new ArrayList<>(produtos); // faz uma copia dos produtos fornecidos, substitui o for que tinha
+													// para o vetor
+		this.algoritmo = algoritmo;
+		this.criterio = criterio;
+		this.format_flags = format_flags;
+		this.filtro = filtro;
+		this.argFiltro = argFiltro;
 
-    }
+	}
 
 	private int particiona(List<Produto> produtos, int ini, int fim) { // nao tenho ctz, mas acho que os parametros tao certos - ana
 
-		Produto x = produtos.get(ini); // subtitui Produto x = produtos[ini] pq nao da para acessar o indice direto na List
+		Produto x = produtos.get(ini); // subtitui Produto x = produtos[ini] pq nao da para acessar o indice direto na
+										// List
 		int i = (ini - 1);
 		int j = (fim + 1);
 
@@ -164,7 +172,6 @@ public class GeradorDeRelatorios {
 
 	public void debug() { // produtos.size() substitui produtos.length
 
-
 		System.out.println("Gerando relatório para lista contendo " + produtos.size() + " produto(s)");
 
 		System.out.println("parametro filtro = '" + argFiltro + "'");
@@ -184,8 +191,8 @@ public class GeradorDeRelatorios {
 	 * 
 	 * 3. STRATEGY: critério de filtragem: todos (ou seja, todos os produtos entram
 	 * na listagem gerada); produtos cujo estoque seja menor ou igual a uma certa
-	 * quantidade; e produtos de uma determinada categoria. 
-	 * 	-> ainda vou criar um strategy pra cada tipo de filto
+	 * quantidade; e produtos de uma determinada categoria.
+	 * -> ainda vou criar um strategy pra cada tipo de filto
 	 * 
 	 * 4. opções de formatação: padrão (nenhuma opção aplicada); itálico; e negrito.
 	 * As formatações são implementadas usando tags HTML que aplicam o efeito
@@ -208,66 +215,80 @@ public class GeradorDeRelatorios {
 	 * •carregar produtos de um arquivo CSV (exemplo acompanha enunciado) e
 	 * salvá-los em umacoleção de produtos;
 	 */
-	private SortingAlgoStrategy getSortingAlgorithm(boolean crescente) {
+	private SortingStrategy getSortingAlgorithm(boolean crescente) {
 		if (crescente) {
 			if (algoritmo.equals(ALG_INSERTIONSORT)) {
-				return new SortingAlgoCrescInsertionSort();
+				return new InsertionSortCresc();
 			} else if (algoritmo.equals(ALG_QUICKSORT)) {
-				return new SortingAlgoCrescQuickSort();
+				return new QuickSortCresc();
 			} else {
 				throw new IllegalArgumentException("Algoritmo invalido!");
 			}
-		}else{
+		} else {
 			if (algoritmo.equals(ALG_INSERTIONSORT)) {
-				return new SortingAlgoDecrescInsertionSort(); 
+				return new InsertionSortDecresc();
 			} else if (algoritmo.equals(ALG_QUICKSORT)) {
-				return new SortingAlgoDecrescQuickSort();
+				return new QuickSortDecresc();
 			} else {
 				throw new IllegalArgumentException("Algoritmo invalido!");
 			}
 		}
 	}
 
-	private SortingAlgoStrategy getSortStrategy() {
-		SortingAlgoStrategy strategy;
+	private SortingStrategy getSortStrategy() {
+		SortingStrategy strategy;
 		if (criterio.equals(CRIT_PRECO_CRESC)) {
-			strategy = new PrecoSortingStrategy(getSortingAlgorithm(true));
+			strategy = new SortPreco(getSortingAlgorithm(true));
 		} else if (criterio.equals(CRIT_DESC_CRESC)) {
-			strategy = new DescSortingStrategy(getSortingAlgorithm(true));
+			strategy = new SortDesc(getSortingAlgorithm(true));
 		} else if (criterio.equals(CRIT_ESTOQUE_CRESC)) {
-			strategy = new QtdSortingStrategy(getSortingAlgorithm(true));
+			strategy = new SortQtd(getSortingAlgorithm(true));
 		} else if (criterio.equals(CRIT_DESC_DECRESC)) {
-			strategy = new DescSortingStrategy(getSortingAlgorithm(false));
+			strategy = new SortDesc(getSortingAlgorithm(false));
 		} else if (criterio.equals(CRIT_ESTOQUE_DECRESC)) {
-			strategy = new QtdSortingStrategy(getSortingAlgorithm(false));
+			strategy = new SortQtd(getSortingAlgorithm(false));
 		} else if (criterio.equals(CRIT_PRECO_DECRESC)) {
-			strategy = new PrecoSortingStrategy(getSortingAlgorithm(false));
+			strategy = new SortPreco(getSortingAlgorithm(false));
 		} else {
 			throw new IllegalArgumentException("Criterio invalido!");
 		}
 		return strategy;
 	}
 
+	private FilterStrategy getFilterStrategy() {
+		FilterStrategy filter;
+		if (filtro.equals(FILTRO_CATEGORIA_IGUAL_A)) {
+			filter = new FilterCategoria(argFiltro);
+		} else if (filtro.equals(FILTRO_ESTOQUE_MENOR_OU_IQUAL_A)) {
+			filter = new FilterEstoque(argFiltro);
+		} else if (filtro.equals(FILTRO_TODOS)) {
+			filter = new FilterTodos();
+		} else if (filtro.equals(FILTRO_DESCRICAO_SUBSTRING)) {
+			filter = new FilterDesc(argFiltro);
+		} else if (filtro.equals(FILTRO_PRECO_INTERVALO)) {
+			filter = new FilterInterval(argFiltro);
+		} else {
+			throw new IllegalArgumentException("Criterio invalido!");
+		}
+		return filter;
+	}
+
 	public void geraRelatorio(String arquivoSaida) throws IOException {
 
 		debug();
-		/*
-		 * essa funcao gera relatorio muito provavelmente quebra o
-		 * Single Responsability Principle pq ela basicamente faz tudo que o código
-		 * manda
-		 * Acho que, dada certa explicação no relatório, da pra mudar bastante coisa
-		 * aqui
-		 * Foda que ainda nao sei exatamente o certo a se fazer
-		 */
-
 		// A FUNCAO ORDENA VAI SER UM TIPO STRATEGY, QUE VAI DEFINIDO DE ACORDO COM OS
 		// PARAMETROS DO OBJETO
 
 		// ficaria:
-		SortingAlgoStrategy strategy = getSortStrategy();
-		strategy.ordena(0, produtos.length - 1); // novo, utilizando strategy
+		SortingStrategy strategy = getSortStrategy();
+		strategy.ordena(produtos, 0, produtos.size() - 1); // novo, utilizando strategy
 		// tem q mudar oq essa bomba de ordenacao recebe.
-		ordena(0, produtos.length - 1); // antigo
+		// ordena(0, produtos.size() - 1); // antigo
+
+		// FILTROS:
+		List<Produto> filteredList = new ArrayList<Produto>();
+		FilterStrategy filter = getFilterStrategy();
+		filteredList = filter.filtra(produtos); // lista ja filtrada de acordo com as especificações passadas
 
 		PrintWriter out = new PrintWriter(arquivoSaida);
 
@@ -277,64 +298,101 @@ public class GeradorDeRelatorios {
 		out.println("Relatorio de Produtos:");
 		out.println("<ul>");
 
-		int count = 0;
-
-		for (int i = 0; i < produtos.length; i++) {
-
-			Produto p = produtos[i];
-			boolean selecionado = false;
-
-			if (filtro.equals(FILTRO_TODOS)) {
-
-				selecionado = true;
-			} else if (filtro.equals(FILTRO_ESTOQUE_MENOR_OU_IQUAL_A)) {
-
-				if (p.getQtdEstoque() <= Integer.parseInt(argFiltro))
-					selecionado = true;
-			} else if (filtro.equals(FILTRO_CATEGORIA_IGUAL_A)) {
-
-				if (p.getCategoria().equalsIgnoreCase(argFiltro))
-					selecionado = true;
-			} else {
-				throw new RuntimeException("Filtro invalido!");
+		for (Produto p : filteredList) {
+			if ((format_flags & FORMATO_ITALICO) > 0) {
+				p = new ProdutoItalico(p);
 			}
-
-			if (selecionado) {
-
-				out.print("<li>");
-
-				if ((format_flags & FORMATO_ITALICO) > 0) {
-
-					out.print("<span style=\"font-style:italic\">");
-				}
-
-				if ((format_flags & FORMATO_NEGRITO) > 0) {
-
-					out.print("<span style=\"font-weight:bold\">");
-				}
-
-				out.print(p.formataParaImpressao());
-
-				if ((format_flags & FORMATO_NEGRITO) > 0) {
-
-					out.print("</span>");
-				}
-
-				if ((format_flags & FORMATO_ITALICO) > 0) {
-
-					out.print("</span>");
-				}
-
-				out.println("</li>");
-				count++;
+			if ((format_flags & FORMATO_NEGRITO) > 0) {
+				p = new ProdutoNegrito(p);
 			}
 		}
-
+		int count = 0;
+		/*
+		 * 
+		 * for (int i = 0; i < produtos.size(); i++) {
+		 * 
+		 * Produto p = produtos.get(i);
+		 * boolean selecionado = false;
+		 * 
+		 * if (filtro.equals(FILTRO_TODOS)) { //tem q fazer a filtragem ainda
+		 * 
+		 * selecionado = true;
+		 * } else if (filtro.equals(FILTRO_ESTOQUE_MENOR_OU_IQUAL_A)) {
+		 * 
+		 * if (p.getQtdEstoque() <= Integer.parseInt(argFiltro))
+		 * selecionado = true;
+		 * } else if (filtro.equals(FILTRO_CATEGORIA_IGUAL_A)) {
+		 * 
+		 * if (p.getCategoria().equalsIgnoreCase(argFiltro))
+		 * selecionado = true;
+		 * } else {
+		 * throw new RuntimeException("Filtro invalido!");
+		 * }
+		 * 
+		 * if (selecionado) { //tem que implementar o decorator aqui
+		 * 
+		 * out.print("<li>");
+		 * 
+		 * if ((format_flags & FORMATO_ITALICO) > 0) {
+		 * 
+		 * out.print("<span style=\"font-style:italic\">");
+		 * }
+		 * 
+		 * if ((format_flags & FORMATO_NEGRITO) > 0) {
+		 * 
+		 * out.print("<span style=\"font-weight:bold\">");
+		 * }
+		 * 
+		 * out.print(p.formataParaImpressao());
+		 * 
+		 * if ((format_flags & FORMATO_NEGRITO) > 0) {
+		 * 
+		 * out.print("</span>");
+		 * }
+		 * 
+		 * if ((format_flags & FORMATO_ITALICO) > 0) {
+		 * 
+		 * out.print("</span>");
+		 * }
+		 * 
+		 * out.println("</li>");
+		 * count++;
+		 * }
+		 * }
+		 */
 		out.println("</ul>");
-		out.println(count + " produtos listados, de um total de " + produtos.length + ".");
+		out.println(count + " produtos listados, de um total de " + produtos.size() + ".");
 		out.println("</body>");
 		out.println("</html>");
 		out.close();
+	}
+
+	public List<Produto> recebeCarregaProdutos(File csvFile) {
+		List<Produto> list = new ArrayList<Produto>();
+		try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+
+			String linha = br.readLine();
+			linha = br.readLine();
+			while (linha != null) {
+
+				String[] vetor = linha.split(", ");
+				Integer id = Integer.parseInt(vetor[0]);
+				String descricao = vetor[1];
+				String categoria = vetor[2];
+				Integer qntEstoque = Integer.parseInt(vetor[3]);
+				Double preco = Double.parseDouble(vetor[4]);
+
+				Produto prod = new ProdutoPadrao(id, descricao, categoria, qntEstoque, preco);
+				list.add(prod);
+
+				linha = br.readLine();
+			}
+
+		} catch (IOException e) {
+			System.out.println("Error: " + e.getMessage());
+		}
+
+		return list;
 	}
 
 	public static List<Produto> carregaProdutos() {
@@ -368,12 +426,13 @@ public class GeradorDeRelatorios {
 		produtos.add(new ProdutoPadrao(25, "Carregador Generico", "Telefonia", 9, 30.00));
 		produtos.add(new ProdutoPadrao(26, "Monitor VGA 14 polegadas", "Informatica", 2, 199.90));
 		produtos.add(new ProdutoPadrao(27, "Nokia N-Gage", "Telefonia", 9, 699.00));
-		produtos.add(new ProdutoPadrao(28, "Disquetes Maxell 5.25 polegadas (caixa com 10 unidades)", "Informatica", 23, 49.00));
+		produtos.add(new ProdutoPadrao(28, "Disquetes Maxell 5.25 polegadas (caixa com 10 unidades)", "Informatica", 23,
+				49.00));
 		produtos.add(new ProdutoPadrao(29, "Alone in The Dark", "Games", 11, 59.00));
 		produtos.add(new ProdutoPadrao(30, "The Art of Computer Programming Vol. 1", "Livros", 3, 240.00));
 		produtos.add(new ProdutoPadrao(31, "The Art of Computer Programming Vol. 2", "Livros", 2, 200.00));
 		produtos.add(new ProdutoPadrao(32, "The Art of Computer Programming Vol. 3", "Livros", 4, 270.00));
-	
+
 		return produtos;
 
 	}
@@ -384,12 +443,13 @@ public class GeradorDeRelatorios {
 
 			System.out.println("Uso:");
 			System.out.println("\tjava " + GeradorDeRelatorios.class.getName()
-					+ " <algoritmo> <critério de ordenação> <critério de filtragem> <parâmetro de filtragem> <opções de formatação>");
+					+ " <algoritmo> <critério de ordenação> <critério de filtragem> <parâmetro de filtragem> <arquivo.csv> <opções de formatação>");
 			System.out.println("Onde:");
 			System.out.println("\talgoritmo: 'quick' ou 'insertion'");
 			System.out.println("\tcriterio de ordenação: 'preco_c' ou 'descricao_c' ou 'estoque_c'");
 			System.out.println("\tcriterio de filtragem: 'todos' ou 'estoque_menor_igual' ou 'categoria_igual'");
 			System.out.println("\tparâmetro de filtragem: argumentos adicionais necessários para a filtragem");
+			System.out.println("\tarquivo.csv: arquivo planilha que contém os produtos que serão usados pelo programa");
 			System.out.println("\topções de formatação: 'negrito' e/ou 'italico'");
 			System.out.println();
 			System.exit(1);
@@ -399,10 +459,12 @@ public class GeradorDeRelatorios {
 		String opcao_criterio_ord = args[1];
 		String opcao_criterio_filtro = args[2];
 		String opcao_parametro_filtro = args[3];
+		String filePath = args[4];
+		File csvFile = new File(filePath);
 
 		String[] opcoes_formatacao = new String[2];
-		opcoes_formatacao[0] = args.length > 4 ? args[4] : null;
-		opcoes_formatacao[1] = args.length > 5 ? args[5] : null;
+		opcoes_formatacao[0] = args.length > 5 ? args[5] : null;
+		opcoes_formatacao[1] = args.length > 6 ? args[6] : null;
 		int formato = FORMATO_PADRAO;
 
 		for (int i = 0; i < opcoes_formatacao.length; i++) {
@@ -412,7 +474,8 @@ public class GeradorDeRelatorios {
 					? op.equals("negrito") ? FORMATO_NEGRITO : (op.equals("italico") ? FORMATO_ITALICO : 0)
 					: 0);
 		}
-
+		// já pode ser usado:
+		// new GeradorDeRelatorios(recebeCarregaProdutos(csvFile))
 		GeradorDeRelatorios gdr = new GeradorDeRelatorios(carregaProdutos(),
 				opcao_algoritmo,
 				opcao_criterio_ord,
