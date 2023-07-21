@@ -5,74 +5,40 @@ public class QuickSortCresc implements SortingStrategy {
     // vai permitir um acesso a essas variaveis
     // nao sei preciso pensar ainda - itu
 
-    public void ordena(List <Produto> produtos, int ini, int fim) {
+    public void ordena(List <Produto> produtos, int ini, int fim, String criterio) {
 
         if (ini < fim) {
 
-            int q = particiona(produtos, ini, fim);
+            int q = particiona(produtos, criterio, ini, fim);
 
-            ordena(produtos, ini, q);
-            ordena(produtos, q + 1, fim);
+            ordena(produtos, ini, q, criterio);
+            ordena(produtos, q + 1, fim, criterio);
         }
 
     }
 
-    private int particiona(List<Produto> produtos, int ini, int fim) {
+	private int particiona(List<Produto> produtos, String criterio, int ini, int fim) {
         Produto x = produtos.get(ini); // subtitui Produto x = produtos[ini] pq nao da para acessar o indice direto na List
 		int i = (ini - 1);
 		int j = (fim + 1);
 
 		while (true) {
 
-			if (criterio.equals(CRIT_DESC_CRESC)) {
+			do{
+				j--;
+			} while(compara(produto.get(j)), x, criterio) > 0);
 
-				do {
-					j--;
+			do {
+				i++;
+			} while(compara(produto.get(i), x, criterio) < 0);
 
-				} while (produtos.get(j).getDescricao().compareToIgnoreCase(x.getDescricao()) > 0);
-
-				do {
-					i++;
-
-				} while (produtos.get(i).getDescricao().compareToIgnoreCase(x.getDescricao()) < 0);
-			} else if (criterio.equals(CRIT_PRECO_CRESC)) {
-
-				do {
-					j--;
-
-				} while (produtos.get(j).getPreco() > x.getPreco());
-
-				do {
-					i++;
-
-				} while (produtos.get(i).getPreco() < x.getPreco());
-			}
-
-			else if (criterio.equals(CRIT_ESTOQUE_CRESC)) {
-
-				do {
-					j--;
-
-				} while (produtos.get(j).getQtdEstoque() > x.getQtdEstoque());
-
-				do {
-					i++;
-
-				} while (produtos.get(i).getQtdEstoque() < x.getQtdEstoque());
-
+			if(i < j){
+				Produto temp = produtos.get(i);
+				produtos.set(i, produtos.get(j));
+				produtos.set(j, temp);
 			} else {
-
-				throw new RuntimeException("Criterio invalido!");
-			}
-
-			if (i < j) {
-
-				Produto temp = produtos.get(i); // substitui Produto temp = produtos[i];
-				produtos.set(i, produtos.get(j)); // substitui produtos[i] = produtos[j];
-				produtos.set(j, temp); // substitui produtos[j] = temp;
-
-			} else
 				return j;
+			}
 
 		}
         
