@@ -26,6 +26,9 @@ public class GeradorDeRelatorios {
 	public static final String FILTRO_PRECO_INTERVALO = "preco_intervalo";
 	public static final String FILTRO_DESCRICAO_SUBSTRING = "descricao_sub";
 
+	public static final String CRITERIO_COR_DESC = "desc_cor";
+	public static final String CRITERIO_COR_ID = "id_cor";
+
 	// operador bit a bit "ou" pode ser usado para combinar mais de
 	// um estilo de formatacao simultaneamente (veja como no main)
 	public static final int FORMATO_PADRAO = 0b0000;
@@ -37,10 +40,12 @@ public class GeradorDeRelatorios {
 	private String criterio;
 	private String filtro;
 	private String argFiltro;
+	private String criterioCor;
+	private String argsCor;
 	private int format_flags;
 
 	public GeradorDeRelatorios(List<Produto> produtos, String algoritmo, String criterio, String filtro,
-			String argFiltro, int format_flags) {
+			String argFiltro, String criterioCor, String argsCor, int format_flags) {
 
 		this.produtos = new ArrayList<>(produtos); // faz uma copia dos produtos fornecidos, substitui o for que tinha
 													// para o vetor
@@ -49,6 +54,8 @@ public class GeradorDeRelatorios {
 		this.format_flags = format_flags;
 		this.filtro = filtro;
 		this.argFiltro = argFiltro;
+		this.criterioCor = criterioCor;
+		this.argsCor = argsCor;
 
 	}
 
@@ -151,7 +158,26 @@ public class GeradorDeRelatorios {
 				p = new ProdutoNegrito(p);
 			}
 			//ainda tem q implementar a ideia de sublist aqui
+			
 			//cor especifica
+			if(criterioCor.equals(CRITERIO_COR_DESC))
+			{
+				FilterStrategy auxFilter = new FilterDesc(argsCor);
+				List<Produto> auxList = new ArrayList<>();
+				auxList = auxFilter.filtra(filteredList);
+				for (Produto auxP : auxList) {
+					if(p == auxP){
+						p = new ProdutoCor(p, argsCor);
+					}
+				}
+			}else if(criterioCor.equals(CRITERIO_COR_ID)){
+				for (int i = 0; i < filteredList.size()-1; i++) {
+					if(p.getId() == filteredList.get(i).getId())
+					{
+						p = new ProdutoCor(p, argsCor);
+					}
+				}
+			}
 		}
 		int count = 0;
 		/*
@@ -308,6 +334,7 @@ public class GeradorDeRelatorios {
 		String opcao_parametro_filtro = args[3];
 		String filePath = args[4];
 		File csvFile = new File(filePath);
+		//adicionar possibilidade de inserção de cor;
 
 		String[] opcoes_formatacao = new String[2];
 		opcoes_formatacao[0] = args.length > 5 ? args[5] : null;
