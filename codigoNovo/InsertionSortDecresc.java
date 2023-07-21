@@ -43,4 +43,19 @@ public class InsertionSortDecresc implements SortingStrategy
             produtos.set(j + 1, x); // substitui produtos[j + 1] = x;
         }
     }
+
+    private int compara(Produto p1, Produto p2, String criterio) {
+
+        if(criterio.equals(CRIT_DESC_DECRESC)) {
+            return -1 * p1.getDescricao().compareToIgnoreCase(p2.getDescricao());
+        } else if(criterio.equals(CRIT_PRECO_DECRESC)) {
+            return -1 * Double.compare(p1.getPreco(), p2.getPreco());
+        } else if(criterio.equals(CRIT_ESTOQUE_DECRESC)){
+            return -1 * Integer.compare(p1.getQtdEstoque(), p2.getQtdEstoque());
+        } else {
+            throw new IllegalArgumentException("Criterio invalido!");
+        }
+
+    }
+
 }
