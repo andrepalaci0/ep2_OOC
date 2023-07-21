@@ -1,5 +1,11 @@
 import java.util.*;
 public class InsertionSortCresc implements SortingStrategy {
+    private String criterio;
+    public InsertionSortCresc (String criterio)
+    {
+        this.criterio = criterio;
+    }
+
     /*
      * public int particiona(int ini, int fim) {
      * return -1; // esse metodo nao eh util pro insertionSort entao ele so retorna

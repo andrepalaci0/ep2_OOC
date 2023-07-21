@@ -52,124 +52,6 @@ public class GeradorDeRelatorios {
 
 	}
 
-	private int particiona(List<Produto> produtos, int ini, int fim) { // nao tenho ctz, mas acho que os parametros tao certos - ana
-
-		Produto x = produtos.get(ini); // subtitui Produto x = produtos[ini] pq nao da para acessar o indice direto na
-										// List
-		int i = (ini - 1);
-		int j = (fim + 1);
-
-		while (true) {
-
-			if (criterio.equals(CRIT_DESC_CRESC)) {
-
-				do {
-					j--;
-
-				} while (produtos.get(j).getDescricao().compareToIgnoreCase(x.getDescricao()) > 0);
-
-				do {
-					i++;
-
-				} while (produtos.get(i).getDescricao().compareToIgnoreCase(x.getDescricao()) < 0);
-			} else if (criterio.equals(CRIT_PRECO_CRESC)) {
-
-				do {
-					j--;
-
-				} while (produtos.get(j).getPreco() > x.getPreco());
-
-				do {
-					i++;
-
-				} while (produtos.get(i).getPreco() < x.getPreco());
-			}
-
-			else if (criterio.equals(CRIT_ESTOQUE_CRESC)) {
-
-				do {
-					j--;
-
-				} while (produtos.get(j).getQtdEstoque() > x.getQtdEstoque());
-
-				do {
-					i++;
-
-				} while (produtos.get(i).getQtdEstoque() < x.getQtdEstoque());
-
-			} else {
-
-				throw new RuntimeException("Criterio invalido!");
-			}
-
-			if (i < j) {
-
-				Produto temp = produtos.get(i); // substitui Produto temp = produtos[i];
-				produtos.set(i, produtos.get(j)); // substitui produtos[i] = produtos[j];
-				produtos.set(j, temp); // substitui produtos[j] = temp;
-
-			} else
-				return j;
-
-		}
-
-	}
-
-	private void ordena(List<Produto> produtos, int ini, int fim) { // nao tenho ctz, mas acho que os parametros tao certos - ana
-
-		if (algoritmo.equals(ALG_INSERTIONSORT)) {
-
-			for (int i = ini; i <= fim; i++) {
-
-				Produto x = produtos.get(i);
-				int j = (i - 1);
-
-				while (j >= ini) {
-
-					if (criterio.equals(CRIT_DESC_CRESC)) {
-
-						if (x.getDescricao().compareToIgnoreCase(produtos.get(j).getDescricao()) < 0) {
-
-							produtos.set(j + 1, produtos.get(j)); // substitui produtos[j + 1] = produtos[j];
-							j--;
-						} else
-							break;
-					} else if (criterio.equals(CRIT_PRECO_CRESC)) {
-
-						if (x.getPreco() < produtos.get(j).getPreco()) {
-
-							produtos.set(j + 1, produtos.get(j)); // substitui produtos[j + 1] = produtos[j];
-							j--;
-						} else
-							break;
-					} else if (criterio.equals(CRIT_ESTOQUE_CRESC)) {
-
-						if (x.getQtdEstoque() < produtos.get(j).getQtdEstoque()) {
-
-							produtos.set(j + 1, produtos.get(j)); // substitui produtos[j + 1] = produtos[j];
-							j--;
-						} else
-							break;
-					} else
-						throw new RuntimeException("Criterio invalido!");
-				}
-
-				produtos.set(j + 1, x); // substitui produtos[j + 1] = x;
-			}
-		} else if (algoritmo.equals(ALG_QUICKSORT)) {
-
-			if (ini < fim) {
-
-				int q = particiona(ini, fim);
-
-				ordena(ini, q);
-				ordena(q + 1, fim);
-			}
-		} else {
-			throw new RuntimeException("Algoritmo invalido!");
-		}
-	}
-
 	public void debug() { // produtos.size() substitui produtos.length
 
 		System.out.println("Gerando relatório para lista contendo " + produtos.size() + " produto(s)");
@@ -177,58 +59,21 @@ public class GeradorDeRelatorios {
 		System.out.println("parametro filtro = '" + argFiltro + "'");
 	}
 
-	/*
-	 * Coisas a se consertar no código:
-	 * 
-	 * 1. STRATEGY: algoritmo de ordenação: Quicksort e Insertion Sort.
-	 * (Parcialmente Feito. Olhar arquivos que comecem com SortingAlgo)
-	 * 
-	 * 2. STRATEGY: critério de ordenação: ordem crescente pelo atributo descrição
-	 * de um
-	 * produto; ordem crescente pelo atributo preço de um produto; e ordem crescente
-	 * pelo atributo
-	 * quantidade em estoque de um produto.
-	 * 
-	 * 3. STRATEGY: critério de filtragem: todos (ou seja, todos os produtos entram
-	 * na listagem gerada); produtos cujo estoque seja menor ou igual a uma certa
-	 * quantidade; e produtos de uma determinada categoria.
-	 * -> ainda vou criar um strategy pra cada tipo de filto
-	 * 
-	 * 4. opções de formatação: padrão (nenhuma opção aplicada); itálico; e negrito.
-	 * As formatações são implementadas usando tags HTML que aplicam o efeito
-	 * desejado a um texto
-	 */
-
-	/*
-	 * coisas a implementar no código:
-	 * 
-	 * critérios de ordenação em ordem decrescente para os atributos descrição,
-	 * preço e estoque de um produto (são 3 critérios no total);
-	 * 
-	 * •critério de filtragem para selecionar produtos com preço dentro de um
-	 * intervalo determinado;
-	 * 
-	 * •critério de filtragem para selecionar produtos cuja descrição contenha uma
-	 * determinada subs-tring;
-	 * 
-	 * •decorador de formatação para definir a cor do texto referente a um produto;
-	 * •carregar produtos de um arquivo CSV (exemplo acompanha enunciado) e
-	 * salvá-los em umacoleção de produtos;
-	 */
+	
 	private SortingStrategy getSortingAlgorithm(boolean crescente) {
 		if (crescente) {
 			if (algoritmo.equals(ALG_INSERTIONSORT)) {
-				return new InsertionSortCresc();
+				return new InsertionSortCresc(criterio);
 			} else if (algoritmo.equals(ALG_QUICKSORT)) {
-				return new QuickSortCresc();
+				return new QuickSortCresc(criterio);
 			} else {
 				throw new IllegalArgumentException("Algoritmo invalido!");
 			}
 		} else {
 			if (algoritmo.equals(ALG_INSERTIONSORT)) {
-				return new InsertionSortDecresc();
+				return new InsertionSortDecresc(criterio);
 			} else if (algoritmo.equals(ALG_QUICKSORT)) {
-				return new QuickSortDecresc();
+				return new QuickSortDecresc(criterio);
 			} else {
 				throw new IllegalArgumentException("Algoritmo invalido!");
 			}
@@ -305,6 +150,8 @@ public class GeradorDeRelatorios {
 			if ((format_flags & FORMATO_NEGRITO) > 0) {
 				p = new ProdutoNegrito(p);
 			}
+			//ainda tem q implementar a ideia de sublist aqui
+			//cor especifica
 		}
 		int count = 0;
 		/*

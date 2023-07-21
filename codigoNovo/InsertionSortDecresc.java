@@ -1,6 +1,12 @@
 import java.util.*;
 public class InsertionSortDecresc implements SortingStrategy
 {
+    private String criterio;
+    public InsertionSortDecresc(String criterio)
+    {
+        this.criterio = criterio;
+    }
+
     public void ordena(List <Produto> produtos, int ini, int fim) {
         // tem q alterar oq ele recebe, pra ele ordenar por um tipo generico pré
         // definido

@@ -2,19 +2,25 @@ import java.util.*;
 public class QuickSortDecresc implements SortingStrategy
 {
     
-    public void ordena(List <Produto> produtos, int ini, int fim, String criterio) {
+    private String criterio;
+    public QuickSortDecresc(String criterio)
+    {
+        this.criterio = criterio;
+    }
+
+    public void ordena(List <Produto> produtos, int ini, int fim) {
 
         if (ini < fim) {
 
-            int q = particiona(produtos, criterio, ini, fim);
+            int q = particiona(produtos, ini, fim);
 
-            ordena(produtos, ini, q, criterio);
-            ordena(produtos, q + 1, fim, criterio);
+            ordena(produtos, ini, q);
+            ordena(produtos, q + 1, fim);
         }
 
     }
 
-    private int particiona(List<Produto> produtos, String criterio, int ini, int fim) {
+    private int particiona(List<Produto> produtos, int ini, int fim) {
         Produto x = produtos.get(ini); // subtitui Produto x = produtos[ini] pq nao da para acessar o indice direto na List
 		int i = (ini - 1);
 		int j = (fim + 1);
@@ -23,11 +29,11 @@ public class QuickSortDecresc implements SortingStrategy
 
 			do{
 				j--;
-			} while(compara(produto.get(j)), x, criterio) > 0);
+			} while(compara(produtos.get(j), x, criterio) > 0);
 
 			do {
 				i++;
-			} while(compara(produto.get(i), x, criterio) < 0);
+			} while(compara(produtos.get(i), x, criterio) < 0);
 
 			if(i < j){
 				Produto temp = produtos.get(i);
