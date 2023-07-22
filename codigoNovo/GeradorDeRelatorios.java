@@ -32,23 +32,11 @@ public class GeradorDeRelatorios {
 	public static final String CRITERIO_FORMATACAO_NEGRITO = "negrito";
 	public static final String CRITERIO_FORMATACAO_ITALICO = "italico";
 
-	// operador bit a bit "ou" pode ser usado para combinar mais de
-	// um estilo de formatacao simultaneamente (veja como no main)
-	public static final int FORMATO_PADRAO = 0b0000;
-	public static final int FORMATO_NEGRITO = 0b0001;
-	public static final int FORMATO_ITALICO = 0b0010;
-
 	private List<Produto> produtos; // otimizacao usando collections, substitui o private Produto[] produtos
 	private String algoritmo;
 	private String criterio;
 	private String filtro;
 	private String argFiltro;
-	//private String criterioCor;
-	//private String cor;
-	//private String argsCor;
-	//private String critFormatacao;
-	//private String tipoFormatacao;
-	//private String parametroTipoFormatacao;
 
 	public GeradorDeRelatorios(List<Produto> produtos, String algoritmo, String criterio, String filtro,
 			String argFiltro) {
@@ -61,13 +49,15 @@ public class GeradorDeRelatorios {
 		this.argFiltro = argFiltro;
 	}
 
-	public void debug() { // produtos.size() substitui produtos.length
+	public void debug() {
 
 		System.out.println("Gerando relatório para lista contendo " + produtos.size() + " produto(s)");
 
 		System.out.println("parametro filtro = '" + argFiltro + "'");
 	}
 
+	// Define o algoritmo de ordenação (Quick ou Insert, crescente ou decrescente)
+	// de acordo com o contexto (parametro passsado no construtor)
 	private SortingStrategy getSortingAlgorithm(boolean crescente) {
 		if (crescente) {
 			if (algoritmo.equals(ALG_INSERTIONSORT)) {
@@ -88,6 +78,8 @@ public class GeradorDeRelatorios {
 		}
 	}
 
+	// Define o que será ordenado de acordo com o contexto (parametro passado no
+	// construtor)
 	private SortingStrategy getSortStrategy() {
 		SortingStrategy strategy;
 		if (criterio.equals(CRIT_PRECO_CRESC)) {
@@ -108,6 +100,7 @@ public class GeradorDeRelatorios {
 		return strategy;
 	}
 
+	// Define o filtro a ser utilizado de acordo com o contexto
 	private FilterStrategy getFilterStrategy() {
 		FilterStrategy filter;
 		if (filtro.equals(FILTRO_CATEGORIA_IGUAL_A)) {
@@ -126,22 +119,44 @@ public class GeradorDeRelatorios {
 		return filter;
 	}
 
+	/*
+	 * 
+	 * Note que as funções anteriores (Exceto debug()) são privadas, ou seja
+	 * o cliente final não sabe como os critérios são definidos internamente e
+	 * não tem acesso a essas funções, garantindo o princípio do Encapsulamento
+	 * 
+	 * Função principal do programa:
+	 * Responsável somente por gerar o relatório HTML, respeitando o primeiro
+	 * princípio SOLID, Single Responsability Principle, ao contrário da
+	 * implementação anterior.
+	 * 
+	 */
 	public void geraRelatorio(String arquivoSaida) throws IOException {
 
 		debug();
-		SortingStrategy strategy = getSortStrategy();
-		strategy.ordena(produtos, 0, produtos.size() - 1); // novo, utilizando strategy
-		List<Produto> filteredList = new ArrayList<Produto>();
-		FilterStrategy filter = getFilterStrategy();
-		filteredList = filter.filtra(produtos); // lista ja filtrada de acordo com as especificações passadas
-		
+		// ORDENAÇÃO:
+		SortingStrategy strategy = getSortStrategy(); // Solicita o algoritmo e o critério de ordenação.
+		strategy.ordena(produtos, 0, produtos.size() - 1); // Ordena os produtos de acordo com o critério.
+		// É relevante que a função geraRelatorio() não sabe qual algoritmo está sendo
+		// utilizado, nem o critério.
+
+		// FILTRAGEM:
+		List<Produto> filteredList = new ArrayList<Produto>(); // É criada uma nova lista
+		FilterStrategy filter = getFilterStrategy(); // É solicitado um critério de filtragem
+		filteredList = filter.filtra(produtos); // A lista previamente criada recebe a lista de produtos do objeto
+												// (this.produtos) filtrada pela função filtra()
+
+		// É relevante que a função geraRelatorio() não sabe qual o critério de
+		// filtragem e nem o define, somente solicita a filtragem
+
+		// IMPRESSÃO: (principal responsabilidade da função)
 		PrintWriter out = new PrintWriter(arquivoSaida);
 		out.println("<!DOCTYPE html><html>");
 		out.println("<head><title>Relatorio de produtos</title></head>");
 		out.println("<body>");
 		out.println("Relatorio de Produtos:");
 		out.println("<ul>");
-		
+
 		int count = 0;
 		for (Produto p : filteredList) {
 			count++;
@@ -155,6 +170,15 @@ public class GeradorDeRelatorios {
 		out.close();
 	}
 
+	/*
+	 * Função de leitura do arquivo .csv (planilha)
+	 * Para o funcionamento desta função, as planilhas inseridas no programa DEVEM
+	 * seguir o modelo de exemplo, contendo:
+	 * ID; DESCRICAO, CATEGORIA, QTD ESTOQUE, PRECO, NEGRITO, ITALICO, COR;
+	 * Como na planilha de exemplo todos os produtos os mesmo campos, todos
+	 * preenchidos, assume-se que outras planilhas de testes também terão exatamente
+	 * os campos citados, todos preenchidos
+	 */
 	public static List<Produto> recebeCarregaProdutos(File csvFile) {
 		List<Produto> list = new ArrayList<Produto>();
 		try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
@@ -169,13 +193,26 @@ public class GeradorDeRelatorios {
 				String categoria = vetor[2];
 				Integer qntEstoque = Integer.parseInt(vetor[3]);
 				Double preco = Double.parseDouble(vetor[4]);
+				// Observe a utilização do padrão de projeto Decorator:
+				// Todos os produtos são inicalmente criados como Produto Padrão.
 				Produto prod = new ProdutoPadrao(id, descricao, categoria, qntEstoque, preco);
-
+				// ^ note a utilização da interface 'produto'
 				if (vetor[5].equals("true"))
+					// Caso o produto específico tenha a seção 'Negrito' assinalada como true
+					// Ele é atualizado usando o decorador ProdutoNegrito, que mantém as mesmas
+					// funcionalidades, pois implementa a classe abstrata ProdutoDecorator, que 
+					// por sua vez, implementa a interface Produto. ProdutoNegrito irá somente
+					// adicionar a tag HTML de negrito quando chamada sua função preparaParaImpressao()
+					
+					//Uma melhor explicação pode ser encontrada no relatório.
 					prod = new ProdutoNegrito(prod);
-				if(vetor[6].equals("true"))
+
+				if (vetor[6].equals("true"))
+					//O mesmo é valido para produtos com 'Italico' assinalado como true
 					prod = new ProdutoItalico(prod);
-				
+
+				//Como na planilha exemplo todo produto possui uma cor específica, 
+				//sempre implementamos uma cor a um produto.
 				prod = new ProdutoCor(prod, vetor[7]);
 
 				list.add(prod);
@@ -237,16 +274,19 @@ public class GeradorDeRelatorios {
 		if (args.length < 4) {
 
 			System.out.println("Uso:");
-			System.out.println("\tjava " + GeradorDeRelatorios.class.getName() + " <algoritmo> <critério de ordenação> <critério de filtragem> <parâmetro de filtragem> <csv File> <opções de formatação>");
+			System.out.println("\tjava " + GeradorDeRelatorios.class.getName()
+					+ " <algoritmo> <critério de ordenação> <critério de filtragem> <parâmetro de filtragem> <csv File>");
 			System.out.println("Onde:");
 			System.out.println("\talgoritmo: 'quick' ou 'insertion'");
-			System.out.println("\tcriterio de ordenação: 'preco_c' ou 'descricao_c' ou 'estoque_c' e para ordenação decrescente: 'preco_dc' ou 'descricao_dc' ou 'estoque_dc'");
-			System.out.println("\tcriterio de filtragem: 'todos' ou 'estoque_menor_igual' ou 'categoria_igual' ou 'preco_intervalo' ou 'descricao_sub'"); 
-			System.out.println("\tATENÇÃO: Caso seja selecionado 'preco_intervalo' , os parametros devem seguir o modelo: '10.35-31.50'");
+			System.out.println(
+					"\tcriterio de ordenação: 'preco_c' ou 'descricao_c' ou 'estoque_c' e para ordenação decrescente: 'preco_dc' ou 'descricao_dc' ou 'estoque_dc'");
+			System.out.println(
+					"\tcriterio de filtragem: 'todos' ou 'estoque_menor_igual' ou 'categoria_igual' ou 'preco_intervalo' ou 'descricao_sub'");
+			System.out.println(
+					"\tATENÇÃO: Caso seja selecionado 'preco_intervalo' , os parametros devem seguir o modelo: '10.35-31.50'");
 			System.out.println("\tCom PONTO (.) e com '-' separando os dois numeros");
-			System.out.println("\tparâmetro de filtragem: argumentos adicionais necessários para a filtragem"); 
+			System.out.println("\tparâmetro de filtragem: argumentos adicionais necessários para a filtragem");
 			System.out.println("\tcsv File: caminho do arquivo .csv contendo os produtos");
-			System.out.println("\topções de formatação: 'negrito' e/ou 'italico'");
 			System.out.println();
 			System.exit(1);
 		}
@@ -257,27 +297,17 @@ public class GeradorDeRelatorios {
 		String opcao_parametro_filtro = args[3];
 		String filePath = args[4];
 		File csvFile = new File(filePath);
-		
-		
-		String [] opcoes_formatacao = new String[2];
-		opcoes_formatacao[0] = args.length > 5 ? args[5] : null;
-		opcoes_formatacao[1] = args.length > 6 ? args[6] : null;
-		int formato = FORMATO_PADRAO;
-		
-		for(int i = 0; i < opcoes_formatacao.length; i++) {
 
-			String op = opcoes_formatacao[i];
-			formato |= (op != null ? op.equals("negrito") ? FORMATO_NEGRITO : (op.equals("italico") ? FORMATO_ITALICO : 0) : 0); 
-		}
 		// já pode ser usado:
 		// new GeradorDeRelatorios(recebeCarregaProdutos(csvFile))
+		// a função carregaProdutos() ainda existe e é funcional, porém
+		// os produtos não terão formatação (italico, negrito, cor).
 
-		GeradorDeRelatorios gdr = new GeradorDeRelatorios(	recebeCarregaProdutos(csvFile), 
-									opcao_algoritmo,
-									opcao_criterio_ord,
-									opcao_criterio_filtro,
-									opcao_parametro_filtro
-								 );
+		GeradorDeRelatorios gdr = new GeradorDeRelatorios(recebeCarregaProdutos(csvFile),
+				opcao_algoritmo,
+				opcao_criterio_ord,
+				opcao_criterio_filtro,
+				opcao_parametro_filtro);
 
 		try {
 			gdr.geraRelatorio("saida.html");

@@ -9,8 +9,9 @@ public class FilterDesc implements FilterStrategy {
     }
 
     private boolean hasString(Produto p) {
-        String aux = compare;
-        int index = p.getDescricao().indexOf(aux);
+        String aux = compare.toLowerCase();
+        String auxProduto = p.getDescricao().toLowerCase();
+        int index = auxProduto.indexOf(aux);
         if (index == -1)
             return false;
         return true;
