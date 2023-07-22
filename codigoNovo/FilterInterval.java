@@ -29,5 +29,6 @@ public class FilterInterval implements FilterStrategy {
             }
         }
         return newList;
+
     }
 }

@@ -43,9 +43,9 @@ public class GeradorDeRelatorios {
 	private String criterio;
 	private String filtro;
 	private String argFiltro;
-	private String criterioCor;
+	//private String criterioCor;
 	//private String cor;
-	private String argsCor;
+	//private String argsCor;
 	//private String critFormatacao;
 	//private String tipoFormatacao;
 	//private String parametroTipoFormatacao;
@@ -129,22 +129,13 @@ public class GeradorDeRelatorios {
 	public void geraRelatorio(String arquivoSaida) throws IOException {
 
 		debug();
-		// A FUNCAO ORDENA VAI SER UM TIPO STRATEGY, QUE VAI DEFINIDO DE ACORDO COM OS
-		// PARAMETROS DO OBJETO
-
-		// ficaria:
 		SortingStrategy strategy = getSortStrategy();
 		strategy.ordena(produtos, 0, produtos.size() - 1); // novo, utilizando strategy
-		// tem q mudar oq essa bomba de ordenacao recebe.
-		// ordena(0, produtos.size() - 1); // antigo
-
-		// FILTROS:
 		List<Produto> filteredList = new ArrayList<Produto>();
 		FilterStrategy filter = getFilterStrategy();
 		filteredList = filter.filtra(produtos); // lista ja filtrada de acordo com as especificações passadas
-
+		
 		PrintWriter out = new PrintWriter(arquivoSaida);
-
 		out.println("<!DOCTYPE html><html>");
 		out.println("<head><title>Relatorio de produtos</title></head>");
 		out.println("<body>");
@@ -250,7 +241,9 @@ public class GeradorDeRelatorios {
 			System.out.println("Onde:");
 			System.out.println("\talgoritmo: 'quick' ou 'insertion'");
 			System.out.println("\tcriterio de ordenação: 'preco_c' ou 'descricao_c' ou 'estoque_c' e para ordenação decrescente: 'preco_dc' ou 'descricao_dc' ou 'estoque_dc'");
-			System.out.println("\tcriterio de filtragem: 'todos' ou 'estoque_menor_igual' ou 'categoria_igual'"); 
+			System.out.println("\tcriterio de filtragem: 'todos' ou 'estoque_menor_igual' ou 'categoria_igual' ou 'preco_intervalo' ou 'descricao_sub'"); 
+			System.out.println("\tATENÇÃO: Caso seja selecionado 'preco_intervalo' , os parametros devem seguir o modelo: '10.35-31.50'");
+			System.out.println("\tCom PONTO (.) e com '-' separando os dois numeros");
 			System.out.println("\tparâmetro de filtragem: argumentos adicionais necessários para a filtragem"); 
 			System.out.println("\tcsv File: caminho do arquivo .csv contendo os produtos");
 			System.out.println("\topções de formatação: 'negrito' e/ou 'italico'");
