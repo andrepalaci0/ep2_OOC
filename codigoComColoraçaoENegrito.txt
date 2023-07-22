@@ -44,14 +44,15 @@ public class GeradorDeRelatorios {
 	private String filtro;
 	private String argFiltro;
 	private String criterioCor;
-	//private String cor;
+	private String cor;
 	private String argsCor;
-	//private String critFormatacao;
-	//private String tipoFormatacao;
-	//private String parametroTipoFormatacao;
+	private String critFormatacao;
+	private String tipoFormatacao;
+	private String parametroTipoFormatacao;
 
 	public GeradorDeRelatorios(List<Produto> produtos, String algoritmo, String criterio, String filtro,
-			String argFiltro) {
+			String argFiltro, String criterioCor, String cor, String args_cor,
+			 String critFormatacao, String tipoFormatacao, String parametroTipoFormatacao) {
 
 		this.produtos = new ArrayList<>(produtos); // faz uma copia dos produtos fornecidos, substitui o for que tinha
 													// para o vetor
@@ -59,6 +60,13 @@ public class GeradorDeRelatorios {
 		this.criterio = criterio;
 		this.filtro = filtro;
 		this.argFiltro = argFiltro;
+		this.criterioCor = criterioCor;
+		this.cor = cor;
+		this.argsCor = args_cor;
+		this.critFormatacao = critFormatacao;
+		this.tipoFormatacao = tipoFormatacao;
+		this.parametroTipoFormatacao = parametroTipoFormatacao;
+
 	}
 
 	public void debug() { // produtos.size() substitui produtos.length
@@ -68,6 +76,7 @@ public class GeradorDeRelatorios {
 		System.out.println("parametro filtro = '" + argFiltro + "'");
 	}
 
+	
 	private SortingStrategy getSortingAlgorithm(boolean crescente) {
 		if (crescente) {
 			if (algoritmo.equals(ALG_INSERTIONSORT)) {
@@ -125,7 +134,11 @@ public class GeradorDeRelatorios {
 		}
 		return filter;
 	}
-
+	private boolean selecionado(){
+		if(critFormatacao == null) return false;
+		if(parametroTipoFormatacao == null) return true;
+		return true;
+	}
 	public void geraRelatorio(String arquivoSaida) throws IOException {
 
 		debug();
@@ -150,13 +163,50 @@ public class GeradorDeRelatorios {
 		out.println("<body>");
 		out.println("Relatorio de Produtos:");
 		out.println("<ul>");
-		
-		int count = 0;
-		for (Produto p : filteredList) {
-			count++;
-			out.println("<li>" + p.formataParaImpressao() + "</li>");
-		}
 
+		for (Produto p : filteredList) {
+
+			boolean selecionado = selecionado();
+
+			if(selecionado){
+				
+			}
+
+			p.formataParaImpressao();
+
+
+
+
+			if ((FORMATO_ITALICO) > 0) {
+				p = new ProdutoItalico(p);
+			}
+			if ((FORMATO_NEGRITO) > 0) {
+				p = new ProdutoNegrito(p);
+			}
+			//ainda tem q implementar a ideia de sublist aqui
+			
+			//cor especifica
+			if(criterioCor.equals(CRITERIO_COR_DESC))
+			{
+				FilterStrategy auxFilter = new FilterDesc(argsCor);
+				List<Produto> auxList = new ArrayList<>();
+				auxList = auxFilter.filtra(filteredList);
+				for (Produto auxP : auxList) {
+					if(p == auxP){
+						p = new ProdutoCor(p, argsCor);
+					}
+				}
+			}else if(criterioCor.equals(CRITERIO_COR_ID)){
+				for (int i = 0; i < filteredList.size()-1; i++) {
+					if(p.getId() == filteredList.get(i).getId())
+					{
+						p = new ProdutoCor(p, argsCor);
+					}
+				}
+			}
+		}
+		int count = 0;
+		
 		out.println("</ul>");
 		out.println(count + " produtos listados, de um total de " + produtos.size() + ".");
 		out.println("</body>");
@@ -164,7 +214,7 @@ public class GeradorDeRelatorios {
 		out.close();
 	}
 
-	public static List<Produto> recebeCarregaProdutos(File csvFile) {
+	public List<Produto> recebeCarregaProdutos(File csvFile) {
 		List<Produto> list = new ArrayList<Produto>();
 		try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
 
@@ -178,15 +228,8 @@ public class GeradorDeRelatorios {
 				String categoria = vetor[2];
 				Integer qntEstoque = Integer.parseInt(vetor[3]);
 				Double preco = Double.parseDouble(vetor[4]);
+
 				Produto prod = new ProdutoPadrao(id, descricao, categoria, qntEstoque, preco);
-
-				if (vetor[5].equals("true"))
-					prod = new ProdutoNegrito(prod);
-				if(vetor[6].equals("true"))
-					prod = new ProdutoItalico(prod);
-				
-				prod = new ProdutoCor(prod, vetor[7]);
-
 				list.add(prod);
 
 				linha = br.readLine();
@@ -246,14 +289,21 @@ public class GeradorDeRelatorios {
 		if (args.length < 4) {
 
 			System.out.println("Uso:");
-			System.out.println("\tjava " + GeradorDeRelatorios.class.getName() + " <algoritmo> <critério de ordenação> <critério de filtragem> <parâmetro de filtragem> <csv File> <opções de formatação>");
+			System.out.println("\tjava " + GeradorDeRelatorios.class.getName()
+					+ " <algoritmo> <critério de ordenação> <critério de filtragem> <parâmetro de filtragem> <arquivo.csv> <critério de coloração> <cor> <parametro de coloração> <opções de formatação> <critério de formatação> <tipos de formatação> <parâmetro critério>");
 			System.out.println("Onde:");
 			System.out.println("\talgoritmo: 'quick' ou 'insertion'");
-			System.out.println("\tcriterio de ordenação: 'preco_c' ou 'descricao_c' ou 'estoque_c' e para ordenação decrescente: 'preco_dc' ou 'descricao_dc' ou 'estoque_dc'");
-			System.out.println("\tcriterio de filtragem: 'todos' ou 'estoque_menor_igual' ou 'categoria_igual'"); 
-			System.out.println("\tparâmetro de filtragem: argumentos adicionais necessários para a filtragem"); 
-			System.out.println("\tcsv File: caminho do arquivo .csv contendo os produtos");
-			System.out.println("\topções de formatação: 'negrito' e/ou 'italico'");
+			System.out.println("\tcriterio de ordenação: 'preco_c' ou 'descricao_c' ou 'estoque_c'");
+			System.out.println("\tcriterio de filtragem: 'todos' ou 'estoque_menor_igual' ou 'categoria_igual'");
+			System.out.println("\tparâmetro de filtragem: argumentos adicionais necessários para a filtragem");
+			System.out.println("\tarquivo.csv: arquivo planilha que contém os produtos que serão usados pelo programa");
+			System.out.println("\tcritério de coloração: 'desc_cor' ou 'id_cor' ou '0' caso nao deseje colorir");
+			System.out.println("\tcor: cor em hexadecimal ou rgb");
+			System.out.println("\tparâmetro de coloração: id do produto ou substring a ser buscada");
+			System.out.println("\topções de formatação: '0' SEM formatação. '1' TODOS serão formatados igualmente. '2 Formatação específica.");
+			System.out.println("\tcritério de formatação: 'negrio,italico' ou 'negrito' ou 'italico'");
+			System.out.println("\ttipos de formatação: 'id' ou 'desc'");
+			System.out.println("\tparâmetro critério: id especificado (Ex: 32) ou parte da descrição (Ex: 'carregador')");
 			System.out.println();
 			System.exit(1);
 		}
@@ -264,27 +314,62 @@ public class GeradorDeRelatorios {
 		String opcao_parametro_filtro = args[3];
 		String filePath = args[4];
 		File csvFile = new File(filePath);
-		
-		
-		String [] opcoes_formatacao = new String[2];
-		opcoes_formatacao[0] = args.length > 5 ? args[5] : null;
-		opcoes_formatacao[1] = args.length > 6 ? args[6] : null;
-		int formato = FORMATO_PADRAO;
-		
-		for(int i = 0; i < opcoes_formatacao.length; i++) {
-
-			String op = opcoes_formatacao[i];
-			formato |= (op != null ? op.equals("negrito") ? FORMATO_NEGRITO : (op.equals("italico") ? FORMATO_ITALICO : 0) : 0); 
+		String opcao_criterio_cor = args[5];
+		String cor;
+		String args_cor;
+		//String cor, String args_cor, String critFormatacao, String tipoFormatacao, Strimg parametroTipoFormatação
+		int count = 5;
+		if (opcao_criterio_cor.equals("0")) {
+			count++; //6
+			cor = null;
+			args_cor = null;
 		}
+		else{
+			count++; //6
+			cor = args[count];
+			count++; //7
+			args_cor = args[count];
+		}
+		count++;
+		int formatacaoEspec = Integer.parseInt(args[count]); //6 ou 8
+		String especificidades = ""; //criterio de formatacao
+		String especType = "";	//tipo de formatacao
+		String especParam = ""; //parametro do tipo
+		if(formatacaoEspec == 0){
+			//sem formatacao especial
+			especificidades = null;
+			especType = null;
+			especParam = null;
+		}else if(formatacaoEspec == 1){
+			//aplica formatacao em todos sem distincao
+			count++;
+			especificidades = args[count]; //7 ou 9
+			especType = null;
+			especParam = null;
+		}else if(formatacaoEspec ==2)
+		{
+			count++;//8 ou 10
+			especificidades = args[count];
+			count++;//9 ou 11
+			especType = args[count];
+			count++;//10 ou 12
+			especParam = args[count];	
+		}
+		//String cor, String args_cor, String critFormatacao, String tipoFormatacao, Strimg parametroTipoFormatação
 		// já pode ser usado:
 		// new GeradorDeRelatorios(recebeCarregaProdutos(csvFile))
-
-		GeradorDeRelatorios gdr = new GeradorDeRelatorios(	recebeCarregaProdutos(csvFile), 
-									opcao_algoritmo,
-									opcao_criterio_ord,
-									opcao_criterio_filtro,
-									opcao_parametro_filtro
-								 );
+		GeradorDeRelatorios gdr = new GeradorDeRelatorios(carregaProdutos(),
+				opcao_algoritmo,
+				opcao_criterio_ord,
+				opcao_criterio_filtro,
+				opcao_parametro_filtro,
+				opcao_criterio_cor,
+				cor,
+				args_cor,
+				especificidades,
+				especType,
+				especParam
+				);
 
 		try {
 			gdr.geraRelatorio("saida.html");
