@@ -1,9 +1,5 @@
 import java.util.*;
 public class QuickSortCresc implements SortingStrategy {
-    // obviamente esses algoritmos tem q ser adaptados p receber a collection que,
-    // teoricamente
-    // vai permitir um acesso a essas variaveis
-    // nao sei preciso pensar ainda - itu
 
     private String criterio;
     public QuickSortCresc(String criterio)
@@ -24,7 +20,7 @@ public class QuickSortCresc implements SortingStrategy {
     }
 
 	private int particiona(List<Produto> produtos, int ini, int fim) {
-        Produto x = produtos.get(ini); // subtitui Produto x = produtos[ini] pq nao da para acessar o indice direto na List
+        Produto x = produtos.get(ini); 
 		int i = (ini - 1);
 		int j = (fim + 1);
 

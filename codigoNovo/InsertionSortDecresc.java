@@ -8,8 +8,6 @@ public class InsertionSortDecresc implements SortingStrategy
     }
 
     public void ordena(List <Produto> produtos, int ini, int fim) {
-        // tem q alterar oq ele recebe, pra ele ordenar por um tipo generico pré
-        // definido
 
         for(int i = 1; i < produtos.size(); i++) {
             Produto chave = produtos.get(i);

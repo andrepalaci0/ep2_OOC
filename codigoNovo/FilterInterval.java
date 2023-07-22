@@ -5,8 +5,8 @@ public class FilterInterval implements FilterStrategy {
     private double low;
     private double high;
 
-    public FilterInterval(String args) // DEVE SER NESSE FORMATO: n1-n2 , ex: 10.44-35.66 COM PONTO PELO AMOR DE DEUS
-                                       // NAO COM VIRGULA
+    public FilterInterval(String args) // arga DEVE ser no formato "n1-n2", ex: 10.44-35.66
+                                       // com PONTO COMO SEPARADOR DECIMAL (NAO USE VIRGULA!)
     {
         String[] aux = args.split("-");
         double auxLow = 0;

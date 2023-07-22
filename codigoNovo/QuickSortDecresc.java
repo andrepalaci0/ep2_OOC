@@ -21,7 +21,7 @@ public class QuickSortDecresc implements SortingStrategy
     }
 
     private int particiona(List<Produto> produtos, int ini, int fim) {
-        Produto x = produtos.get(ini); // subtitui Produto x = produtos[ini] pq nao da para acessar o indice direto na List
+        Produto x = produtos.get(ini); 
 		int i = (ini - 1);
 		int j = (fim + 1);
 

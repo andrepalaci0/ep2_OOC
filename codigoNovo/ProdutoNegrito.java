@@ -10,9 +10,7 @@ public class ProdutoNegrito extends ProdutoDecorator{
         String textToBold = original;
         textToBold = addBold(textToBold);
         textToBold = addSpan(textToBold);
-        //textToBold =  bold + textToItalic;
-        //isso aqui nao ta exatamente certo, tem q fazer uma busca pelo
-        //"style" e inserir dentro dele. vou fazer depois :)
+
         return textToBold;
     }
     

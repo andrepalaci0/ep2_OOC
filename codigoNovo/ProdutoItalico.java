@@ -10,9 +10,7 @@ public class ProdutoItalico extends ProdutoDecorator{
         String textToItalic = original;
         textToItalic = addItalic(textToItalic);
         textToItalic = addSpan(textToItalic);
-        //textToItalic = italic + textToItalic;
-        //isso aqui nao ta exatamente certo, tem q fazer uma busca pelo
-        //"style" e inserir dentro dele. vou fazer depois :)
+
         return textToItalic;
     }
 
