@@ -5,6 +5,6 @@ O trabalho consiste na refatoração de um código (/codigoAntigo) e aplicação
 Mais informações podem ser encontradas no PDF (EP2.pdf)
 
 Autores:
-Ana Beatriz Rodrigues Chagas
-André Palacio Braga Tivo
+Ana Beatriz Rodrigues Chagas,
+André Palacio Braga Tivo e
 Giovanna Fonseca Couto
